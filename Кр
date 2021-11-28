@@ -1,0 +1,99 @@
+---- Вариант 5 ----
+-- 
+-- 1) Имена людей, у которых хотя бы 5 родителей.
+-- 2) Имена и возраста детей родителей Ивана.
+-- 3) Количество племянников Ивана.
+--
+
+-- 5.1
+SELECT name FROM people
+WHERE (SELECT count() FROM parents WHERE child_id = people.id) >= 5;
+
+-- 5.2
+SELECT child.name, age FROM
+	people  as ivan,
+	people  as child,
+	parents as ivan_to_parent,
+	parents as parent_to_child,
+	ages
+WHERE
+	ivan.name = 'Ivan' AND
+	ivan_to_parent.child_id  = ivan.id  AND
+	ivan_to_parent.parent_id = parent_to_child.parent_id AND
+	child.id                 = parent_to_child.child_id AND
+	child.id = ages.people_id
+GROUP BY child.id;
+
+-- 5.3
+SELECT count(*) FROM (SELECT * FROM
+	people as ivan,
+	parents as ivan_to_parent,
+	parents as parent_to_sibling,
+	parents as sibling_to_nephew
+WHERE
+	ivan.name = 'Ivan' AND
+	ivan_to_parent.child_id     = ivan.id AND
+	ivan_to_parent.parent_id    = parent_to_sibling.parent_id AND
+	sibling_to_nephew.parent_id = parent_to_sibling.child_id AND
+	sibling_to_nephew.parent_id != ivan.id
+GROUP BY sibling_to_nephew.child_id);
+
+
+
+
+
+---- Вариант 6 ----
+-- 
+-- 1) Имена людей, у которых менее 5 детей.
+-- 2) Имена и возраста родителей детей Ивана.
+-- 3) Количество дядей/тётей Ивана.
+--
+-- Отличается от варианта 5 только сменой направления отношений.
+--
+
+
+---- Вариант 7 ----
+--
+-- 1) Имена людей, у которых есть родитель старше 30.
+-- 2) Имена детей родителей Ивана.
+-- 3) Имена и возраста племянников Ивана.
+-- 
+-- Далее дан только разбор первой задачи этого варианта, так как вторая
+-- и третья задачи мало отличаются от таковых из 5 и 6 вариантов.
+--
+
+SELECT name
+FROM people,parents,ages 
+WHERE 
+	child_id  = people.id AND
+	parent_id = people_id AND
+	age > 30
+GROUP BY people.id;
+
+
+
+---- Вариант 8 ----
+-- 
+-- 1) Имена людей, у которых есть ребёнок страше 30.
+-- 2) Количество разных возрастов детей Ивана.
+-- 3) Имена и возраста дядей/тётей Ивана.
+--
+-- Далее разобрана только вторая задача, остальные не отличаются от
+-- задач, разобранных выше.
+--
+
+SELECT count(*) FROM (SELECT * FROM
+	people as ivan,
+	parents,
+	ages
+WHERE
+	ivan.name = 'Ivan' AND
+	parents.parent_id = ivan.id AND
+	parents.child_id  = ages.people_id 
+GROUP BY age);
+
+
+
+
+
+
